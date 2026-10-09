@@ -1,0 +1,13 @@
+# Single-page app: every route under /spliteasy/ serves index.html, except real files and the API.
+RewriteEngine On
+RewriteBase /spliteasy/
+RewriteRule ^api/ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.html [L]
+
+<IfModule mod_headers.c>
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

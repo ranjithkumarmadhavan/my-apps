@@ -1,0 +1,5 @@
+# Only the endpoint scripts are reachable from the web; config.php and lib/ are server-only.
+<FilesMatch "^config">
+  Require all denied
+</FilesMatch>
+Options -Indexes

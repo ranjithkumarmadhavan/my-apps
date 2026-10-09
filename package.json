@@ -1,0 +1,19 @@
+{
+  "name": "my-apps",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "landing",
+    "spliteasy"
+  ],
+  "scripts": {
+    "dev": "concurrently -n landing,spliteasy -c yellow,green \"npm run dev -w landing\" \"npm run dev -w spliteasy\"",
+    "build": "npm run build -w landing && npm run build -w spliteasy",
+    "preview": "vite preview --outDir dist --port 4173"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "vite": "^8.3.1"
+  }
+}
