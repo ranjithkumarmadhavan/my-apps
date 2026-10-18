@@ -204,6 +204,22 @@ function end_session(PDO $db): void
     set_session_cookie('', time() - 3600);
 }
 
+/**
+ * Cleanup callbacks run (inside a transaction) before a user account is deleted. Each app can ship
+ * `<app>/api/on-account-delete.php` returning `function (PDO $db, array $user): void`.
+ */
+function account_delete_hooks(): array
+{
+    $hooks = [];
+    foreach (glob(__DIR__ . '/../../*/api/on-account-delete.php') ?: [] as $file) {
+        $hook = require $file;
+        if (is_callable($hook)) {
+            $hooks[] = $hook;
+        }
+    }
+    return $hooks;
+}
+
 // ---------- validation helpers ----------
 
 function clean_text($value, int $max): string

@@ -205,6 +205,22 @@ switch ($action) {
         $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
         reply(['ok' => true]);
 
+    case 'delete_account':
+        $user = require_user($db);
+        if (($in['confirm'] ?? '') !== 'DELETE') fail('Type DELETE to confirm');
+        if ($user['password_hash'] !== null && !password_verify((string) ($in['password'] ?? ''), $user['password_hash'])) {
+            fail('Password is wrong', 401);
+        }
+        $db->beginTransaction();
+        foreach (account_delete_hooks() as $hook) {
+            $hook($db, $user); // each app detaches or removes its own data first
+        }
+        $db->prepare('DELETE FROM login_attempts WHERE email = ?')->execute([$user['email']]);
+        $db->prepare('DELETE FROM users WHERE id = ?')->execute([$user['id']]); // sessions + resets cascade
+        $db->commit();
+        set_session_cookie('', time() - 3600);
+        reply(['ok' => true]);
+
     default:
         fail('Unknown action');
 }

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { formatMoney } from '../lib/money';
 import { linkProps } from '../lib/router';
+import { syncedLabel } from '../lib/offlineCache';
 
 // ---------- avatar ----------
 const HUES = [152, 210, 265, 330, 25, 45, 190, 290];
@@ -187,4 +188,14 @@ export const todayISO = () => {
 export function formatDate(iso, opts = { day: 'numeric', month: 'short' }) {
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(y, m - 1, d).toLocaleDateString('en-IN', opts);
+}
+
+/** "Offline · showing data from 10 min ago" note for screens showing their cached copy. */
+export function SyncNote({ offline, syncedAt }) {
+  if (!offline || !syncedAt) return null;
+  return (
+    <p className="sync-note" role="status">
+      <span aria-hidden>📡</span> Offline · showing what was saved {syncedLabel(syncedAt)}. Balances may have changed.
+    </p>
+  );
 }

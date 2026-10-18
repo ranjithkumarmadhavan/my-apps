@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { auth } from './lib/api';
 import { match, useRoute } from './lib/router';
 import { Spinner } from './components/ui.jsx';
+import { StatusBars } from './components/AppBars.jsx';
+import { useOnline } from './lib/pwa';
+import { lastUser, rememberUser, setCacheOwner } from './lib/offlineCache';
 import AuthScreen from './screens/AuthScreen.jsx';
 import ResetScreen from './screens/ResetScreen.jsx';
 import GroupsScreen from './screens/GroupsScreen.jsx';
@@ -13,24 +16,73 @@ import JoinScreen from './screens/JoinScreen.jsx';
 import AccountScreen from './screens/AccountScreen.jsx';
 
 export default function App() {
-  const [user, setUser] = useState(undefined); // undefined = still checking
+  return (
+    <>
+      <StatusBars />
+      <Screens />
+    </>
+  );
+}
+
+function Screens() {
+  const [user, setUserState] = useState(undefined); // undefined = still checking
   const [error, setError] = useState('');
+  const [fromCache, setFromCache] = useState(false); // opened offline as the last signed-in user
   const { path, query } = useRoute();
+  const online = useOnline();
+
+  const setUser = useCallback((u) => {
+    setCacheOwner(u?.id);
+    rememberUser(u);
+    setUserState(u);
+  }, []);
+
+  const checkSession = useCallback(() => {
+    setError('');
+    auth('me')
+      .then((d) => {
+        setFromCache(false);
+        setUser(d.user);
+      })
+      .catch((e) => {
+        // No connection: carry on as the last signed-in user and show their cached data.
+        const cached = e.status === 0 ? lastUser() : null;
+        if (cached) {
+          setCacheOwner(cached.id);
+          setFromCache(true);
+          setUserState(cached);
+        } else setError(e.message);
+      });
+  }, [setUser]);
 
   useEffect(() => {
-    auth('me')
-      .then((d) => setUser(d.user))
-      .catch((e) => setError(e.message));
+    checkSession();
     const out = () => setUser(null);
     window.addEventListener('spliteasy:signed-out', out);
     return () => window.removeEventListener('spliteasy:signed-out', out);
-  }, []);
+  }, [checkSession, setUser]);
+
+  // Opened without a connection: confirm the session as soon as we're back online.
+  useEffect(() => {
+    if (online && ((error && user === undefined) || fromCache)) checkSession();
+  }, [online, error, user, fromCache, checkSession]);
 
   if (error && user === undefined) {
     return (
       <div className="wrap center-page">
-        <p className="error">{error}</p>
-        <button className="btn" onClick={() => window.location.reload()}>
+        <span className="empty-emoji" aria-hidden>
+          {online ? '⚠️' : '📡'}
+        </span>
+        {online ? (
+          <p className="error">{error}</p>
+        ) : (
+          <p>
+            <strong>You're offline.</strong>
+            <br />
+            <span className="muted">SplitEasy will load as soon as you're connected.</span>
+          </p>
+        )}
+        <button className="btn" onClick={checkSession}>
           Try again
         </button>
       </div>

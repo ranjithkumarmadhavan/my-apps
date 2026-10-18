@@ -78,7 +78,7 @@ export default function App() {
       </main>
 
       <footer className="wrap footer">
-        © {new Date().getFullYear()} Ranjith Kumar Madhavan · <a href="/privacy.html">Privacy</a>
+        © {new Date().getFullYear()} Ranjith Kumar Madhavan · <a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete account</a>
       </footer>
     </div>
   );

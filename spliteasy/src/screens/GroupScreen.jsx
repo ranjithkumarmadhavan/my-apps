@@ -15,6 +15,7 @@ import {
   categoryEmoji,
   formatDate,
   useToast,
+  SyncNote,
 } from '../components/ui.jsx';
 import CurrencySelect from '../components/CurrencySelect.jsx';
 import { GROUP_EMOJIS } from './NewGroupScreen.jsx';
@@ -27,14 +28,22 @@ const TABS = [
 ];
 
 export default function GroupScreen({ id, tab }) {
-  const { state, error, reload } = useGroup(id);
+  const { state, error, offline, syncedAt, reload } = useGroup(id);
   const [settings, setSettings] = useState(false);
 
   if (!state) {
     return (
       <>
         <TopBar back="/" />
-        <main className="wrap page">{error ? <ErrorText error={error} /> : <Spinner />}</main>
+        <main className="wrap page">
+          {error ? (
+            <ErrorText error={error} />
+          ) : offline ? (
+            <p className="muted">You're offline, and this group hasn't been opened on this device before.</p>
+          ) : (
+            <Spinner />
+          )}
+        </main>
       </>
     );
   }
@@ -61,6 +70,7 @@ export default function GroupScreen({ id, tab }) {
         }
       />
       <main className="wrap page has-fab">
+        <SyncNote offline={offline} syncedAt={syncedAt} />
         <section className="group-hero">
           <div className="my-balance">
             {Object.keys(myNet).length ? (
@@ -543,6 +553,8 @@ export function describeActivity(a, name, obj) {
       return `${who} removed ${a.name}`;
     case 'member_join':
       return `${a.name} joined the group`;
+    case 'account_deleted':
+      return `${a.name} deleted their SplitEasy account and is now listed by name only`;
     case 'expense_add':
       return `${who} added “${a.desc}” (${money})`;
     case 'expense_edit':

@@ -260,12 +260,43 @@ async function auth(body, ctx) {
       return { ok: true };
     }
 
+    case 'delete_account': {
+      const u = requireUser(ctx);
+      if (body.confirm !== 'DELETE') fail('Type DELETE to confirm');
+      if (u.passwordHash !== null && !checkPassword(body.password ?? '', u.passwordHash)) fail('Password is wrong', 401);
+      spliteasyDeleteUser(u);
+      for (const [k, s] of db.sessions) if (s.userId === u.id) db.sessions.delete(k);
+      for (const [k, r] of db.resets) if (r.userId === u.id) db.resets.delete(k);
+      db.users = db.users.filter((x) => x !== u);
+      ctx.setCookie('', -1);
+      return { ok: true };
+    }
+
     default:
       fail('Unknown action');
   }
 }
 
 // ---------- SplitEasy (mirrors spliteasy/public/api/index.php) ----------
+
+/** Mirrors spliteasy/public/api/on-account-delete.php. */
+function spliteasyDeleteUser(user) {
+  for (const g of db.groups.filter((x) => x.ownerId === user.id)) {
+    const heir = db.members
+      .filter((m) => m.groupId === g.id && m.userId !== null && m.userId !== user.id && !m.removed)
+      .sort((a, b) => a.id - b.id)[0];
+    if (heir) g.ownerId = heir.userId;
+    else {
+      for (const k of ['members', 'expenses', 'payments', 'activity']) db[k] = db[k].filter((x) => x.groupId !== g.id);
+      db.groups = db.groups.filter((x) => x !== g);
+    }
+  }
+  for (const m of db.members.filter((x) => x.userId === user.id)) {
+    Object.assign(m, { userId: null, name: user.name, upi: null });
+    logActivity(m.groupId, m.id, { type: 'account_deleted', name: user.name });
+    bump(db.groups.find((g) => g.id === m.groupId));
+  }
+}
 
 function membership(groupId, uid) {
   const group = db.groups.find((g) => g.id === groupId);
@@ -701,8 +732,12 @@ function endpoint(handler) {
 export default function mockApi() {
   return {
     name: 'apps-mock-api',
-    apply: 'serve',
     configureServer(server) {
+      server.middlewares.use('/api/auth.php', endpoint(auth));
+      server.middlewares.use('/spliteasy/api/index.php', endpoint(spliteasy));
+    },
+    // Also under `vite preview`, to test the production build (service worker etc.) locally.
+    configurePreviewServer(server) {
       server.middlewares.use('/api/auth.php', endpoint(auth));
       server.middlewares.use('/spliteasy/api/index.php', endpoint(spliteasy));
     },

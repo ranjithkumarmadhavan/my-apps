@@ -3,6 +3,8 @@ import { auth } from '../lib/api';
 import { navigate } from '../lib/router';
 import { Avatar, ErrorText, TopBar, useToast } from '../components/ui.jsx';
 import CurrencySelect from '../components/CurrencySelect.jsx';
+import { InstallSection } from '../components/AppBars.jsx';
+import { cacheClear } from '../lib/offlineCache';
 
 export default function AccountScreen({ user, onUser }) {
   const toast = useToast();
@@ -42,6 +44,7 @@ export default function AccountScreen({ user, onUser }) {
 
   async function signOut() {
     await auth('logout').catch(() => {});
+    await cacheClear();
     onUser(null);
     navigate('/', { replace: true });
   }
@@ -118,10 +121,82 @@ export default function AccountScreen({ user, onUser }) {
           <button className="btn">{user.hasPassword ? 'Change password' : 'Set password'}</button>
         </form>
 
+        <InstallSection />
+
         <button className="btn danger full" onClick={signOut}>
           Sign out
         </button>
+
+        <DeleteAccount user={user} onUser={onUser} />
       </main>
     </>
+  );
+}
+
+function DeleteAccount({ user, onUser }) {
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function remove(e) {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      await auth('delete_account', { confirm, password });
+      await cacheClear();
+      toast('Your account has been deleted');
+      onUser(null);
+      navigate('/', { replace: true });
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <p className="center small delete-link">
+        <button type="button" className="link-btn danger-text" onClick={() => setOpen(true)}>
+          Delete my account
+        </button>
+      </p>
+    );
+  }
+
+  return (
+    <form className="stack card-section danger-zone" onSubmit={remove}>
+      <h2 className="h2">Delete your account</h2>
+      <ul className="small delete-list">
+        <li>Your sign-in, email, UPI ID and settings are deleted permanently. This can't be undone.</li>
+        <li>
+          In your groups, your name stays as a <strong>name-only guest</strong> so everyone else's expenses and balances
+          stay correct. Any money you owe or are owed is still shown to them.
+        </li>
+        <li>Groups you created are handed to another member with an account, or deleted if nobody else has one.</li>
+      </ul>
+      {user.hasPassword && (
+        <label className="field">
+          <span>Your password</span>
+          <input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        </label>
+      )}
+      <label className="field">
+        <span>Type DELETE to confirm</span>
+        <input autoCapitalize="characters" autoComplete="off" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+      </label>
+      <ErrorText error={error} />
+      <div className="form-actions">
+        <button className="btn danger" disabled={busy || confirm !== 'DELETE'}>
+          {busy ? 'Deleting…' : 'Delete account'}
+        </button>
+        <button type="button" className="btn ghost" onClick={() => (setOpen(false), setError(''))}>
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }

@@ -2,16 +2,39 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { linkProps } from '../lib/router';
 import { formatMoney } from '../lib/money';
-import { Avatar, ErrorText, NetSummary, Spinner, TopBar } from '../components/ui.jsx';
+import { Avatar, ErrorText, NetSummary, Spinner, SyncNote, TopBar } from '../components/ui.jsx';
+import { cacheGet, cacheSet } from '../lib/offlineCache';
+import { InstallBanner } from '../components/AppBars.jsx';
 
 export default function GroupsScreen({ user }) {
   const [groups, setGroups] = useState(null);
   const [error, setError] = useState('');
+  const [offline, setOffline] = useState(false);
+  const [syncedAt, setSyncedAt] = useState(null);
 
   useEffect(() => {
-    api('groups')
-      .then((d) => setGroups(d.groups))
-      .catch((e) => setError(e.message));
+    let fresh = false;
+    // Saved copy first (instant, works offline), then the server's answer replaces it.
+    cacheGet('groups').then((c) => {
+      if (c && !fresh) {
+        setGroups(c.value);
+        setSyncedAt(c.savedAt);
+      }
+    });
+    const load = () =>
+      api('groups')
+        .then((d) => {
+          fresh = true;
+          setGroups(d.groups);
+          setSyncedAt(Date.now());
+          setOffline(false);
+          setError('');
+          cacheSet('groups', d.groups);
+        })
+        .catch((e) => (e.status === 0 ? setOffline(true) : setError(e.message)));
+    load();
+    window.addEventListener('online', load);
+    return () => window.removeEventListener('online', load);
   }, []);
 
   // Totals across every group, per currency.
@@ -33,6 +56,8 @@ export default function GroupsScreen({ user }) {
       />
       <main className="wrap page">
         <h1 className="page-title">Hi {user.name.split(' ')[0]}</h1>
+        <InstallBanner />
+        <SyncNote offline={offline} syncedAt={syncedAt} />
 
         {groups && (
           <section className="summary-cards">
@@ -71,7 +96,8 @@ export default function GroupsScreen({ user }) {
         </div>
 
         <ErrorText error={error} />
-        {!groups && !error && <Spinner />}
+        {!groups && !error && !offline && <Spinner />}
+        {!groups && offline && <p className="muted">You're offline and nothing is saved on this device yet.</p>}
         {groups && !groups.length && (
           <div className="empty">
             <span className="empty-emoji" aria-hidden>

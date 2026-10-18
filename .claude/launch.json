@@ -4,15 +4,37 @@
     {
       "name": "landing",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "-w", "landing"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "landing"
+      ],
       "port": 5173
     },
     {
       "name": "spliteasy",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "-w", "spliteasy"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "spliteasy"
+      ],
       "port": 5174,
       "url": "http://localhost:5174"
+    },
+    {
+      "name": "spliteasy-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "-w",
+        "spliteasy"
+      ],
+      "port": 4174,
+      "url": "http://localhost:4174"
     }
   ]
 }

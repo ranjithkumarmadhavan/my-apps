@@ -1200,3 +1200,88 @@ button.list-row:hover {
     width: 84px !important;
   }
 }
+
+/* ---------- installable app ---------- */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.status-bar.offline {
+  background: var(--warn-soft);
+}
+
+.status-bar.update {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.status-bar.update .btn {
+  min-height: 32px;
+  background: #fff;
+  border-color: #fff;
+  color: #0b7a53;
+}
+
+.install-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px 12px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+}
+
+.install-banner img {
+  border-radius: 12px;
+  flex: none;
+}
+
+.install-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.88rem;
+}
+
+.install-text strong {
+  font-size: 0.98rem;
+}
+
+.sync-note {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--warn-soft);
+  font-size: 0.88rem;
+}
+
+.danger-text {
+  color: var(--neg);
+  align-self: center;
+}
+
+.delete-link {
+  margin-top: 20px;
+}
+
+.danger-zone {
+  margin-top: 20px;
+  border-color: color-mix(in srgb, var(--neg) 40%, var(--border));
+}
+
+.delete-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

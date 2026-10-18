@@ -1,13 +1,17 @@
 # Single-page app: every route under /spliteasy/ serves index.html, except real files and the API.
 RewriteEngine On
 RewriteBase /spliteasy/
-RewriteRule ^api/ - [L]
+# Real files only under these: a missing asset must 404, not get index.html (the service worker would cache it).
+RewriteRule ^(api|assets|icons)/ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . index.html [L]
 
+AddType application/manifest+json .webmanifest
+
+# index.html and the service worker must always be re-checked so new deploys are picked up.
 <IfModule mod_headers.c>
-  <FilesMatch "^index\.html$">
+  <FilesMatch "^(index\.html|sw\.js|manifest\.webmanifest)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>

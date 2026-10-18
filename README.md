@@ -92,6 +92,22 @@ flowchart LR
   amount and note filled in. Desktop shows a QR code instead. The payer still confirms in their own app, and
   then taps "Record payment".
 
+### Installable app, offline and account deletion
+
+- **PWA.** `spliteasy/public/manifest.webmanifest` plus icons in `public/icons/` (regenerate them with
+  `node spliteasy/dev/make-icons.mjs`). The Android app will be this same PWA wrapped as a Trusted Web Activity.
+- **Service worker.** `spliteasy/sw/sw.js` is a template. The build fills in a version and the exact list of
+  built files, and emits `/spliteasy/sw.js`. It caches only the app's own files, never API responses. A new
+  deploy shows a "New version available → Refresh" bar.
+- **Offline viewing.** The groups list, each opened group, and the signed-in user are saved in IndexedDB
+  (`src/lib/offlineCache.js`), keyed per user. Screens show the saved copy instantly, then refresh from the
+  server. With no connection they keep the saved copy and show "Offline · showing what was saved …". Signing out
+  or deleting the account wipes it. Changes made offline are not supported yet; that is Round B.
+- **Account deletion** (`auth.php` action `delete_account`). It runs each app's
+  `<app>/api/on-account-delete.php` hook inside one transaction, then deletes the user. SplitEasy's hook hands
+  owned groups to another member with an account (or deletes the group if there is none), and turns the user into
+  a name-only guest elsewhere so balances stay correct. Public instructions: `/delete-account.html`.
+
 ### Data model
 
 All tables live in one database. Shared account tables have no prefix; SplitEasy's tables start with `se_`.
@@ -211,6 +227,8 @@ npm install
 npm run dev
 ```
 
+- `npm run preview -w spliteasy` serves the production build on http://localhost:4174/spliteasy/ with the same
+  mock API. Use it to test the service worker, which is only registered in production builds.
 - Landing page: http://localhost:5173
 - SplitEasy: http://localhost:5174/spliteasy/ (seeded test login `demo@spliteasy.test` / `demo1234`, with a
   sample "Goa trip" group). The reset-password link prints in the terminal instead of being emailed.
