@@ -13,6 +13,7 @@
     "preview": "vite preview --outDir dist --port 4173"
   },
   "devDependencies": {
+    "@bubblewrap/cli": "^1.27.0",
     "concurrently": "^10.0.5",
     "vite": "^8.3.1"
   }

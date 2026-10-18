@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ranjithkumarmadhavan.spliteasy",
+      "sha256_cert_fingerprints": [
+        "2E:8C:8A:D6:A5:95:44:7A:5F:CC:62:C8:BA:BB:98:FA:02:8A:EF:C5:0C:45:A0:41:AD:91:09:A5:FE:CE:75:CA"
+      ]
+    }
+  }
+]

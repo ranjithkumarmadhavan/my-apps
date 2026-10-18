@@ -1,0 +1,52 @@
+{
+  "packageId": "com.ranjithkumarmadhavan.spliteasy",
+  "host": "apps.ranjithkumarmadhavan.com",
+  "name": "SplitEasy",
+  "launcherName": "SplitEasy",
+  "display": "standalone",
+  "themeColor": "#0F9D6B",
+  "themeColorDark": "#0E1311",
+  "navigationColor": "#0F9D6B",
+  "navigationColorDark": "#0E1311",
+  "navigationDividerColor": "#0F9D6B",
+  "navigationDividerColorDark": "#0E1311",
+  "backgroundColor": "#F5F7F6",
+  "enableNotifications": false,
+  "startUrl": "/spliteasy/",
+  "iconUrl": "https://apps.ranjithkumarmadhavan.com/spliteasy/icons/icon-512.png",
+  "maskableIconUrl": "https://apps.ranjithkumarmadhavan.com/spliteasy/icons/maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\ranji\\.android-keys\\spliteasy\\upload-keystore.jks",
+    "alias": "upload"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://apps.ranjithkumarmadhavan.com/spliteasy/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://apps.ranjithkumarmadhavan.com/spliteasy/",
+  "minSdkVersion": 24,
+  "orientation": "portrait",
+  "fingerprints": [
+    {
+      "name": "upload key",
+      "value": "2E:8C:8A:D6:A5:95:44:7A:5F:CC:62:C8:BA:BB:98:FA:02:8A:EF:C5:0C:45:A0:41:AD:91:09:A5:FE:CE:75:CA"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.0.0"
+}

@@ -29,3 +29,16 @@ yarn-error.log*
 
 # Server-only secrets
 config.php
+
+# Android (Bubblewrap / Gradle) build outputs and signing material
+android/**/build/
+android/**/.gradle/
+android/**/local.properties
+*.apk
+*.aab
+*.idsig
+*.jks
+*.keystore
+
+# Build logs can contain signing commands
+android/**/*.log
